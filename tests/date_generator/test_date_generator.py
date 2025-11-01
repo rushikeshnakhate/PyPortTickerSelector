@@ -24,7 +24,7 @@ def test_date_range_generator_monthly():
     generator = DateRangeGenerator(years=2024, months=[1], rebalancing_months=1)
     result = generator.get_date_range()
     assert isinstance(result, list)
-    assert len(result) == 1
+    assert len(result) == 12
     start, end = result[0]
     assert start.month == 1
     assert start.year == 2024

@@ -9,14 +9,15 @@ import sys
 from pathlib import Path
 from typing import List
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 STRATEGY_TEST_DIR = PROJECT_ROOT / "tests"
+
+# Only these folders are included in coverage
+COVERAGE_TARGETS = ["src/strategies", "src/performance_matrix", "src/indicators"]
 
 
 def run_command(cmd: List[str]) -> int:
     """Execute a command and return the exit status."""
-
     banner = "=" * 70
     print(f"\n{banner}\nRunning: {' '.join(cmd)}\n{banner}\n")
     return subprocess.run(cmd, check=False).returncode
@@ -24,7 +25,6 @@ def run_command(cmd: List[str]) -> int:
 
 def expand_file_option(selected: str) -> List[str]:
     """Translate the file selection flag into concrete pytest targets."""
-
     if selected == "all":
         return [str(STRATEGY_TEST_DIR)]
 
@@ -44,7 +44,6 @@ def expand_file_option(selected: str) -> List[str]:
 
 def build_markers(args: argparse.Namespace) -> str | None:
     """Combine requested marker expressions into a single pytest -m value."""
-
     markers: List[str] = []
     if args.markers:
         markers.append(args.markers)
@@ -100,8 +99,11 @@ def main(argv: List[str] | None = None) -> int:
     if args.verbose:
         cmd.append("-v")
 
+    # Apply coverage only to the selected folders
     if args.coverage:
-        cmd.extend(["--cov=src", "--cov-report=html", "--cov-report=term"])
+        for folder in COVERAGE_TARGETS:
+            cmd.extend(["--cov", folder])
+        cmd.extend(["--cov-report=html", "--cov-report=term"])
 
     marker_expr = build_markers(args)
     if marker_expr:
@@ -127,4 +129,3 @@ def main(argv: List[str] | None = None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-
