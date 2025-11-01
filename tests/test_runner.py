@@ -11,7 +11,7 @@ from typing import List
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-STRATEGY_TEST_DIR = PROJECT_ROOT / "tests" / "strategies"
+STRATEGY_TEST_DIR = PROJECT_ROOT / "tests"
 
 
 def run_command(cmd: List[str]) -> int:
