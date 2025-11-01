@@ -22,3 +22,6 @@ coverage.xml
 Thumbs.db
 
 cache_files
+.idea/
+*.iml
+*.xml
