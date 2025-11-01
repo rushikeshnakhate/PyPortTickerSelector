@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)file:///C:/Users/USER/OneDrive/Desktop/2.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyPortTickerSelector - Detailed Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            padding: 20px;
+            overflow-x: auto;
+        }
+        
+        .container {
+            min-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 30px;
+            font-size: 26px;
+        }
+        
+        /* Layer containers */
+        .layer {
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .layer-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .layer-content {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+            position: relative;
+        }
+        
+        /* Component boxes */
+        .component {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 250px;
+            max-width: 350px;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .component:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .component-title {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 16px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+        
+        .component-api {
+            font-family: 'Courier New', monospace;
+            background: #f7fafc;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin: 8px 0;
+            border-left: 3px solid #4299e1;
+            color: #2d3748;
+        }
+        
+        .component-feature {
+            font-size: 12px;
+            padding: 5px 0;
+            color: #4a5568;
+        }
+        
+        .component-feature::before {
+            content: "✓ ";
+            color: #48bb78;
+            font-weight: bold;
+        }
+        
+        /* Color coding */
+        .user-interface { border-color: #667eea; background: #f7faff; }
+        .data-layer { border-color: #48bb78; background: #f0fff4; }
+        .processing-layer { border-color: #f6ad55; background: #fffaf0; }
+        .strategy-layer { border-color: #fc8181; background: #fff5f5; }
+        .cache-layer { border-color: #9f7aea; background: #faf5ff; }
+        .logging-layer { border-color: #4299e1; background: #ebf8ff; }
+        
+        /* Arrows */
+        .arrow-down {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 20px solid #cbd5e0;
+            margin: 10px auto;
+        }
+        
+        .arrow-right {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-left: 15px solid #cbd5e0;
+            margin: 0 10px;
+        }
+        
+        .flow-label {
+            text-align: center;
+            font-size: 11px;
+            color: #718096;
+            font-style: italic;
+            margin: 5px 0;
+        }
+        
+        /* Icons */
+        .icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        .async-badge {
+            background: #48bb78;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 8px;
+        }
+        
+        .sync-badge {
+            background: #4299e1;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 8px;
+        }
+        
+        .cache-badge {
+            background: #9f7aea;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 8px;
+        }
+        
+        .log-badge {
+            background: #f6ad55;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 8px;
+        }
+        
+        /* Horizontal flow */
+        .horizontal-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        /* Legend */
+        .legend {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 8px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .container {
+                min-width: 100%;
+            }
+        }
+        
+        /* Connection lines */
+        .connection-line {
+            position: absolute;
+            background: #cbd5e0;
+            z-index: -1;
+        }
+        
+        .vertical-line {
+            width: 2px;
+            height: 40px;
+            left: 50%;
+            margin-left: -1px;
+        }
+        
+        .horizontal-line {
+            height: 2px;
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏗️ PyPortTickerSelector - Detailed Architecture Diagram</h1>
+        
+        <!-- LAYER 1: USER INTERFACE -->
+        <div class="layer">
+            <div class="layer-title">LAYER 1: USER INTERFACE (Entry Point)</div>
+            <div class="layer-content">
+                <div class="component user-interface">
+                    <div class="component-title">📱 Main API Function</div>
+                    <div class="component-api" title="Click to copy API code" style="cursor: pointer;">run_pyport_ticker_selector(
+    years=[2024],
+    tickers=None,
+    top_n_tickers=15,
+    rebalancing_months=1,
+    indicators=None,
+    performance_matrix=None,
+    strategies=None
+)</div>
+                    <div class="component-feature">Single entry point for users</div>
+                    <div class="component-feature">Returns 3 DataFrames</div>
+                    <div class="component-feature">Fully configurable parameters</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="arrow-down"></div>
+        <div class="flow-label">Initiates workflow</div>
+        
+        <!-- LAYER 2: ORCHESTRATION -->
+        <div class="layer">
+            <div class="layer-title">LAYER 2: ORCHESTRATION &amp; DATE GENERATION</div>
+            <div class="layer-content">
+                <div class="component data-layer">
+                    <div class="component-title">📅 DateRangeGenerator</div>
+                    <div class="component-api" title="Click to copy API code" style="cursor: pointer;">generator = DateRangeGenerator(
+    years=2024,
+    rebalancing_months=1
+)
+date_ranges = generator.get_date_range()</div>
+                    <div class="component-feature">Generates rebalancing periods</div>
+                    <div class="component-feature">Supports daily/monthly/yearly</div>
+                    <div class="component-feature">Custom period support</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="arrow-down"></div>
+        <div class="flow-label">For each rebalancing period</div>
+        
+        <!-- LAYER 3: DATA ACQUISITION -->
+        <div class="layer">
+            <div class="layer-title">LAYER 3: DATA ACQUISITION (Sync &amp; Async)</div>
+            <div class="layer-content">
+                <div class="component data-layer" style="flex: 1;">
+                    <div class="component-title">🌐 DataFetcher <span class="sync-badge">SYNC</span></div>
+                    <div class="component-api" title="Click to copy API code" style="cursor: pointer;">fetcher = DataFetcher()
+df = fetcher.get_close_price_service(
+    ticker='AAPL',
+    start_date='2024-01-01',
+    end_date='2024-12-31'
+)</div>
+                    <div class="component-feature">Sequential fetching</div>
+                    <div class="component-feature">Yahoo Finance API</div>
+                    <div class="component-feature">Time: N × 2s per stock</div>
+                </div>
+                
+                <div class="component data-layer" style="flex: 1;">
+                    <div class="component-title">⚡ DataFetcher <span class="async-badge">ASYNC</span></div>
+                    <div class="component-api" title="Click to copy API code" style="cursor: pointer;">df = await fetcher.get_close_price_service_async(
+    ticker='AAPL',
+    start_date='2024-01-01',
+    end_date='2024-12-31'
+)</div>
+                    <div class="component-feature">Parallel fetching (auto-enabled)</div>
+                    <div class="component-feature">1000 stocks in ~50s</div>
+                    <div class="component-feature">40× speedup vs sync</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="arrow-down"></div>
+        <div class="flow-label">All requests intercepted by cache</div>
+        
+        <!-- LAYER 4: CACHING LAYER -->
+        <div class="layer">
+            <div class="layer-title">LAYER 4: CACHING LAYER <span class="cache-badge">87-91% Hit Rate</span></div>
+            <div class="layer-content">
+                <div class="component cache-layer" style="flex: 1;">
+                    <div class="component-title">🗄️ PyKeyCache - Pandas</div>
+                    <div class="component-api" title="Click to copy API code" style="cursor: pointer;">cache = CacheFactory.get_cache(
+    CacheType.PANDAS
+)
+cache.set("key", data, ttl=3600)
+data = cache.get("key")</div>
+                    <div class="component-feature">In-memory (fastest)</div>
+                    <div class="component-feature">Best for: Single user/dev</div>
+                    <div class="component-feature">Temporary storage</div>
+                </div>
+                
+                <div class="component cache-layer" style="flex: 1;">
+                    <div class="component-title">🗄️ PyKeyCache - Redis</div>
+                    <div class="component-api" title="Click to copy API code" style="cursor: pointer;">cache = CacheFactory.get_cache(
+    CacheType.REDIS
+)
+cache.set("key", data, ttl=7200)</div>
+                    <div class="component-feature">Distributed caching</div>
+                    <div class="component-feature">Best for: Production/multi-user</div>
+                    <div class="component-feature">Shared data across processes</div>
+                </div>
+                
+                <div class="component cache-layer" style="flex: 1;">
+                    <div class="component-title">🗄️ PyKeyCache - SQLite</div>
+                    <div class="component-api" title="Click to copy API code" style="cursor: pointer;">cache = CacheFactory.get_cache(
+    CacheType.SQLITE
+)
+cache.set("key", data, ttl=86400)</div>
+                    <div class="component-feature">Persistent storage</div>
+                    <div class="component-feature">Best for: Long-term archive</div>
+                    <div class="component-feature">Survives restarts</div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 15px; font-size: 12px; color: #718096;">
+                ℹ️ Cache reduces API calls by 8-12×, all data requests flow through this layer
+            </div>
+        </div>
+        
+        <div class="arrow-down"></div>
+        <div class="flow-label">Cached price data (OHLCV) flows to processing modules</div>
+        
+        <!-- LAYER 5: PROCESSING MODULES -->
+        <div class="layer">
+            <div class="layer-title">LAYER 5: COMPUTATION MODULES (Indicators &amp; Metrics)</div>
+            <div class="layer-content">
+                <div class="component processing-layer" style="flex: 1 1 0%; border-width: 2px;">
+                    <div class="component-title">📊 PyTickerIndicators <span class="log-badge">LOGGED</span></div>
+                    <div class="component-api" title="Click to copy API code" style="cursor: pointer;">factory = IndicatorFactory(period=14)
+indicators = factory.calculate_all_indicators(
+    ticker_data_df=price_data,
+    ticker='AAPL',
+    start_date='2024-01-01',
+    end_date='2024-12-31'
+)</div>
+                    <div class="component-feature">30+ Technical Indicators</div>
+                    <div class="component-feature">Trend: MACD, Aroon, EMA, SMA</div>
+                    <div class="component-feature">Momentum: RSI, Williams %R, ROC</div>
+                    <div class="component-feature">Volatility: Bollinger, Keltner, ATR</div>
+                    <div class="component-feature">Volume: OBV, CMF, ADL, MFI</div>
+                    <div class="component-feature">Results cached automatically</div>
+                </div>
+                
+                <div class="component processing-layer" style="flex: 1;">
+                    <div class="component-title">📈 PyTickerPerformanceMatrix <span class="log-badge">LOGGED</span></div>
+                    <div class="component-api" title="Click to copy API code" style="cursor: pointer;">metrics = get_performance_metrics_bulk(
+    ticker_data_df=price_data,
+    ticker_list=['AAPL', 'GOOGL'],
+    market_data=benchmark_data,
+    start_date='2024-01-01',
+    end_date='2024-12-31'
+)</div>
+                    <div class="component-feature">25+ Performance Metrics</div>
+                    <div class="component-feature">Returns: Annualized, Cumulative</div>
+                    <div class="component-feature">Risk: Volatility, MaxDrawdown, VaR</div>
+                    <div class="component-feature">Risk-Adjusted: Sharpe, Sortino</div>
+                    <div class="component-feature">Market: Alpha, Beta, IR</div>
+                    <div class="component-feature">Results cached automatically</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="arrow-down"></div>
+        <div class="flow-label">Indicators + Performance data merged</div>
+        
+        <!-- LAYER 6: STRATEGY SELECTION -->
+        <div class="layer">
+            <div class="layer-title">LAYER 6: STRATEGY SELECTION &amp; RANKING</div>
+            <div class="layer-content">
+                <div class="component strategy-layer" style="border-width: 2px;">
+                    <div class="component-title">🎯 PyStrategyBuilder <span class="log-badge">LOGGED</span></div>
+                    <div class="component-api" title="Click to copy API code" style="cursor: pointer;">factory = StrategyFactory(
+    indicators_df=indicators,
+    performance_df=performance,
+    top_n=5
+)
+selected = factory.apply_strategy(
+    'RSIMomentumStrategy'
+)</div>
+                    <div class="component-feature">30+ Built-in Strategies</div>
+                    <div class="component-feature">Momentum: RSI, MACD, Williams</div>
+                    <div class="component-feature">Trend: Aroon, EMA, MA</div>
+                    <div class="component-feature">Volatility: Bollinger, Keltner</div>
+                    <div class="component-feature">Risk-Adjusted: Sharpe, Sortino</div>
+                    <div class="component-feature">Mean Reversion: Bollinger, Donchian</div>
+                    <div class="component-feature">Ranks stocks, selects top N</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="arrow-down"></div>
+        <div class="flow-label">Top N tickers selected</div>
+        
+        <!-- LAYER 7: VALIDATION (Optional) -->
+        <div class="layer">
+            <div class="layer-title">LAYER 7: VALIDATION &amp; BENCHMARKING (Optional)</div>
+            <div class="layer-content">
+                <div class="component data-layer" style="flex: 1;">
+                    <div class="component-title">📊 PyBenchmarkComparison</div>
+                    <div class="component-api" title="Click to copy API code" style="cursor: pointer;">fetcher = MarketBenchmarkFetcher()
+tickers = fetcher.get_benchmark_tickers('nse_50')
+perf = fetcher.get_benchmark_performance(
+    benchmark='nse_50',
+    start_date='2024-01-01',
+    end_date='2024-12-31',
+    rebalance_frequency='monthly'
+)</div>
+                    <div class="component-feature">Compare vs NSE 50/100/500</div>
+                    <div class="component-feature">Statistical validation (t-test)</div>
+                    <div class="component-feature">Walk-forward analysis</div>
+                    <div class="component-feature">Performance profiling</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="arrow-down"></div>
+        <div class="flow-label">Final results ready</div>
+        
+        <!-- LAYER 8: OUTPUT -->
+        <div class="layer">
+            <div class="layer-title">LAYER 8: OUTPUT LAYER</div>
+            <div class="layer-content">
+                <div class="component user-interface" style="flex: 1;">
+                    <div class="component-title">📄 Results DataFrame</div>
+                    <div class="component-api" title="Click to copy API code" style="cursor: pointer;">Columns:
+- strategy_name
+- ticker
+- score
+- start_date
+- end_date
+- selection_reason
+
+Saved: strategy_results.csv</div>
+                </div>
+                
+                <div class="component user-interface" style="flex: 1;">
+                    <div class="component-title">📄 Indicators DataFrame</div>
+                    <div class="component-api" title="Click to copy API code" style="cursor: pointer;">Columns:
+- Ticker
+- RSI
+- MACD
+- BollingerBands
+- ... (30+ more)
+
+Saved: indicators_results.csv</div>
+                </div>
+                
+                <div class="component user-interface" style="flex: 1;">
+                    <div class="component-title">📄 Performance DataFrame</div>
+                    <div class="component-api" title="Click to copy API code" style="cursor: pointer;">Columns:
+- Ticker
+- SharpeRatio
+- SortinoRatio
+- Alpha, Beta
+- ... (25+ more)
+
+Saved: performance_results.csv</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CROSS-CUTTING CONCERNS -->
+        <div class="layer" style="margin-top: 40px; border: 3px dashed #4299e1;">
+            <div class="layer-title" style="background: linear-gradient(135deg, #4299e1 0%, #667eea 100%);">
+                🔧 CROSS-CUTTING CONCERNS (Run Throughout All Layers)
+            </div>
+            <div class="layer-content">
+                <div class="component logging-layer" style="flex: 1;">
+                    <div class="component-title">📝 Logging System</div>
+                    <div class="component-api" title="Click to copy API code" style="cursor: pointer;">import logging
+logging.basicConfig(level=logging.INFO)
+
+# Automatic logs:
+INFO: Calculating indicators for AAPL
+INFO: Cache hit for AAPL prices
+WARNING: Insufficient data for XYZ
+ERROR: Failed to fetch ABC</div>
+                    <div class="component-feature">4 Levels: DEBUG/INFO/WARNING/ERROR</div>
+                    <div class="component-feature">Captures all operations</div>
+                    <div class="component-feature">File or console output</div>
+                    <div class="component-feature">Complete audit trail</div>
+                </div>
+                
+                <div class="component logging-layer" style="flex: 1;">
+                    <div class="component-title">⚙️ Configuration Management</div>
+                    <div class="component-api" title="Click to copy API code" style="cursor: pointer;">- Default settings
+- Parameter validation
+- Environment variables
+- Error handling
+- Retry logic (3 attempts)</div>
+                    <div class="component-feature">Validates all user inputs</div>
+                    <div class="component-feature">Exponential backoff retries</div>
+                    <div class="component-feature">Graceful error handling</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- LEGEND -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f7faff; border-color: #667eea;"></div>
+                <span>User Interface</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f0fff4; border-color: #48bb78;"></div>
+                <span>Data Layer</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #fffaf0; border-color: #f6ad55;"></div>
+                <span>Processing Layer</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #fff5f5; border-color: #fc8181;"></div>
+                <span>Strategy Layer</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #faf5ff; border-color: #9f7aea;"></div>
+                <span>Cache Layer</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ebf8ff; border-color: #4299e1;"></div>
+                <span>Logging Layer</span>
+            </div>
+        </div>
+        
+        <!-- KEY FEATURES SUMMARY -->
+        <div style="margin-top: 30px; padding: 20px; background: #f7fafc; border-radius: 8px; border-left: 4px solid #667eea;">
+            <h3 style="margin-bottom: 15px; color: #2d3748;">🎯 Key Architecture Features</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <strong>⚡ Asynchronous Execution:</strong>
+                    <ul style="margin-left: 20px; margin-top: 5px; font-size: 13px;">
+                        <li>Automatic for multiple tickers</li>
+                        <li>Sequential: N×2s → Parallel: ~2s</li>
+                        <li>40× speedup for 1000 stocks</li>
+                    </ul>
+                </div>
+                <div>
+                    <strong>🗄️ Caching System:</strong>
+                    <ul style="margin-left: 20px; margin-top: 5px; font-size: 13px;">
+                        <li>87-91% cache hit rate</li>
+                        <li>3 backends: Pandas/Redis/SQLite</li>
+                        <li>8-12× speedup from caching</li>
+                    </ul>
+                </div>
+                <div>
+                    <strong>📝 Logging System:</strong>
+                    <ul style="margin-left: 20px; margin-top: 5px; font-size: 13px;">
+                        <li>Runs across all layers</li>
+                        <li>4 levels: DEBUG/INFO/WARNING/ERROR</li>
+                        <li>Complete audit trail</li>
+                    </ul>
+                </div>
+                <div>
+                    <strong>🔌 Module Connectivity:</strong>
+                    <ul style="margin-left: 20px; margin-top: 5px; font-size: 13px;">
+                        <li>8 layers working together</li>
+                        <li>DataFrames passed between modules</li>
+                        <li>All requests through cache layer</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- DATA FLOW SUMMARY -->
+        <div style="margin-top: 20px; padding: 20px; background: #fffaf0; border-radius: 8px; border-left: 4px solid #f6ad55;">
+            <h3 style="margin-bottom: 15px; color: #2d3748;">🔄 Complete Data Flow</h3>
+            <ol style="margin-left: 20px; font-size: 13px; line-height: 1.8;">
+                <li><strong>User</strong> calls <code>run_pyport_ticker_selector()</code> with parameters</li>
+                <li><strong>DateRangeGenerator</strong> creates rebalancing periods (e.g., monthly)</li>
+                <li><strong>DataFetcher</strong> downloads stock prices (async for multiple tickers)</li>
+                <li><strong>PyKeyCache</strong> intercepts requests, returns cached data (87-91% hit rate)</li>
+                <li><strong>PyTickerIndicators</strong> calculates 30+ technical indicators</li>
+                <li><strong>PyTickerPerformanceMatrix</strong> calculates 25+ performance metrics</li>
+                <li><strong>PyStrategyBuilder</strong> applies strategies, ranks stocks, selects top N</li>
+                <li><strong>PyBenchmarkComparison</strong> (optional) validates against market benchmarks</li>
+                <li><strong>Logging System</strong> records all operations throughout (INFO/WARNING/ERROR)</li>
+                <li><strong>Output</strong> returns 3 DataFrames + saves CSV files</li>
+            </ol>
+        </div>
+    </div>
+    
+    <script>
+        // Add hover effects and tooltips
+        document.querySelectorAll('.component').forEach(component => {
+            component.addEventListener('mouseenter', function() {
+                this.style.borderWidth = '3px';
+            });
+            component.addEventListener('mouseleave', function() {
+                this.style.borderWidth = '2px';
+            });
+        });
+        
+        // Add click to expand API details
+        document.querySelectorAll('.component-api').forEach(api => {
+            api.style.cursor = 'pointer';
+            api.title = 'Click to copy API code';
+            api.addEventListener('click', function() {
+                navigator.clipboard.writeText(this.innerText);
+                const originalBg = this.style.background;
+                this.style.background = '#48bb78';
+                this.style.color = 'white';
+                setTimeout(() => {
+                    this.style.background = originalBg;
+                    this.style.color = '#2d3748';
+                }, 500);
+            });
+        });
+    </script>
+
+</body></html>
