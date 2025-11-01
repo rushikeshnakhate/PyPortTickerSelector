@@ -1,0 +1,23 @@
+# Ignore Python cache and build files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+
+# Test & coverage outputs
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# IDE & editor settings
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+

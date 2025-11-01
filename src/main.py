@@ -88,3 +88,7 @@ def run_pyport_ticker_selector(years,
     performance_df_final.to_csv('performance_results.csv', index=False)
 
     return results_df, indicators_df_final, performance_df_final
+
+
+if __name__ == "__main__":
+    run_pyport_ticker_selector(years=[2024], top_n_tickers=5)
