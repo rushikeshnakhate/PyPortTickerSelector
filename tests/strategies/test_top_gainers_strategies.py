@@ -50,9 +50,28 @@ class TestTopGainersRSIStrategy:
 class TestTopGainersCombinedStrategy:
     def test_combined_strategy_sorts_by_combined_gain(self):
         df = create_strategy_dataframe()
+        df.loc[len(df)] = {
+            "Ticker": "DDD",
+            "BollingerBands": {},
+            "ExponentialMovingAverage": 75.0,
+            "RelativeStrengthIndex": 30.0,
+        }
         result = TopGainersCombinedStrategy(df, top_n=2).run()
 
         assert len(result) == 2
         assert result[0]["ticker"] == "AAA"
         assert result[0]["combined_gain"] >= result[1]["combined_gain"]
+
+    def test_strategy_handles_missing_upper_band(self):
+        df = pd.DataFrame([
+            {
+                "Ticker": "EEE",
+                "BollingerBands": {},
+                "ExponentialMovingAverage": 100.0,
+                "RelativeStrengthIndex": 50.0,
+            }
+        ])
+
+        result = TopGainersStrategy(df, top_n=1).run()
+        assert result[0]["gain"] == 0
 
