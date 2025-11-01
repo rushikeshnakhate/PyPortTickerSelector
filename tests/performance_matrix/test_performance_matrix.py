@@ -43,7 +43,8 @@ def mock_cache():
 @patch("src.performance_matrix.main.CacheFactory.get_cache")
 @patch("src.performance_matrix.main.BenchmarkRelativeMetricsGroup.calculate")
 @patch("src.performance_matrix.main.to_dataframe")
-def test_get_performance_metrics(mock_to_df, mock_group_calc, mock_get_cache, mock_ticker_data, mock_market_data, mock_cache):
+def test_get_performance_metrics(mock_to_df, mock_group_calc, mock_get_cache, mock_ticker_data, mock_market_data,
+                                 mock_cache):
     """Test single ticker performance metrics calculation"""
     mock_get_cache.return_value = mock_cache
     mock_group_calc.return_value = {"metric1": 0.1, "metric2": 0.2}
@@ -54,8 +55,7 @@ def test_get_performance_metrics(mock_to_df, mock_group_calc, mock_get_cache, mo
         ticker_data=mock_ticker_data,
         market_data=mock_market_data,
         start_date="2024-01-01",
-        end_date="2024-01-05",
-        selected_metrics=["metric1"]
+        end_date="2024-01-05"
     )
 
     assert isinstance(df, pd.DataFrame)

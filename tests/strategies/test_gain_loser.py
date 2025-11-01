@@ -50,7 +50,7 @@ def test_top_gainers_rsi_strategy(mock_stock_data):
 
 def test_top_losers_strategy(mock_stock_data):
     strat = TopLosersStrategy(df=mock_stock_data, top_n=2)
-    result, = strat.run() if isinstance(strat.run(), tuple) else strat.run()
+    result = strat.run() if isinstance(strat.run(), tuple) else strat.run()
     # If run returns a list directly
     if isinstance(result, list):
         assert len(result) == 2

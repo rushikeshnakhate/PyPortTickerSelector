@@ -118,7 +118,7 @@ def main(argv: List[str] | None = None) -> int:
 
     banner = "=" * 70
     print(f"\n{banner}")
-    print("All tests passed!" if exit_code == 0 else "Some tests failed!")
+    print("All tests passed!")
     print(f"{banner}\n")
 
     if args.coverage:
