@@ -158,22 +158,29 @@ class TestRatioMetrics:
         stock, _ = make_stock_and_market()
         metric = GainToPainRatio(stock)
         result = metric.calculate()
-        assert isinstance(result, str)
-        assert "attribute 'sum'" in result
+
+        returns = PercentageChange(stock).calculate()
+        expected = returns[returns > 0].max() / abs(returns[returns < 0].min())
+        assert result == pytest.approx(expected)
 
     def test_profit_factor(self):
         stock, _ = make_stock_and_market()
         metric = ProfitFactor(stock)
         result = metric.calculate()
-        assert isinstance(result, str)
-        assert "attribute 'sum'" in result
+
+        returns = PercentageChange(stock).calculate()
+        expected = returns[returns > 0].max() / abs(returns[returns < 0].min())
+        assert result == pytest.approx(expected)
 
     def test_tail_ratio_handles_gain_and_loss(self):
         stock, _ = make_stock_and_market()
         metric = TailRatio(stock)
         result = metric.calculate()
-        assert isinstance(result, str)
-        assert "Tail Ratio calculation failed" in result
+
+        gains = Gain(stock).calculate()
+        losses = Loss(stock).calculate()
+        expected = gains / abs(losses)
+        assert result == pytest.approx(expected)
 
 
 class DummyMetric(BasePerformanceMatrix):
